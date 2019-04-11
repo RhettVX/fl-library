@@ -98,7 +98,7 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
 		}
 	} else { // TODO: I am too tired to remember what should go here
 		buffer := make([]byte, a.PackedSize)
-		f.ReadAt(buffer, int64(a.Offset)+8)
+		f.ReadAt(buffer, int64(a.Offset))
 
 		names := strings.Split(string(buffer), "\x0a")
 		for _, n := range names {
