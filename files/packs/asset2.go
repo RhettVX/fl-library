@@ -74,7 +74,7 @@ func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {
 	}
 }
 
-func (a *Asset2) ReadNameList(f *os.File) (nameList []HashName) {
+func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
 	pos, _ := f.Seek(0, 1)
 
 	if a.IsZip {
@@ -93,12 +93,12 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []HashName) {
 			}
 
 			upperString := bytes.ToUpper([]byte(n))
-			hashCaps := Pack2Hash(upperString)
-			nameList = append(nameList, HashName{hashCaps, n})
+			hashCaps := utils.Pack2Hash(upperString)
+			nameList = append(nameList, utils.HashName{hashCaps, n})
 		}
 	} else { // TODO: I am too tired to remember what should go here
 		buffer := make([]byte, a.PackedSize)
-		f.ReadAt(buffer, int64(a.Offset))
+		f.ReadAt(buffer, int64(a.Offset)+8)
 
 		names := strings.Split(string(buffer), "\x0a")
 		for _, n := range names {
@@ -107,9 +107,8 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []HashName) {
 			}
 
 			upperString := bytes.ToUpper([]byte(n))
-			hashCaps := Pack2Hash(upperString)
-			println(string(upperString))
-			nameList = append(nameList, HashName{hashCaps, n})
+			hashCaps := utils.Pack2Hash(upperString)
+			nameList = append(nameList, utils.HashName{hashCaps, n})
 		}
 	}
 
@@ -117,7 +116,7 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []HashName) {
 	return nameList
 }
 
-func (a *Asset2) ApplyName(nameList []HashName) {
+func (a *Asset2) ApplyName(nameList []utils.HashName) {
 	for _, x := range nameList {
 
 		if a.NameHash == x.Hash {

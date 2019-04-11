@@ -138,7 +138,6 @@ func (p *Pack) WritePack(outDir, outName string) {
 	utils.Check(err)
 
 	// Take this one chunk at a time
-	// TODO: only handles loose assets
 	outFile, err := os.OpenFile(outDir+`\`+outName+".pack", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	utils.Check(err)
 	defer outFile.Close()

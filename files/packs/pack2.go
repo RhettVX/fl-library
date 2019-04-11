@@ -16,7 +16,7 @@ type Pack2 struct {
 	Path string
 	Name string
 
-	NameList []HashName
+	NameList []utils.HashName
 	Assets   []Asset2
 }
 
@@ -82,7 +82,7 @@ func (p *Pack2) LoadFromDir(path string) {
 		a.Path = path + `\` + f.Name()
 		a.IsLoose = true
 		a.Name = f.Name()
-		a.NameHash = Pack2Hash(bytes.ToUpper([]byte(a.Name)))
+		a.NameHash = utils.Pack2Hash(bytes.ToUpper([]byte(a.Name)))
 		a.RealSize = uint64(f.Size())
 
 		// Generate checksum
@@ -119,9 +119,18 @@ func (p *Pack2) Unpack(outDir string) {
 	println("Finished!\n")
 }
 
-// Write is quick and dirty
-func (p *Pack2) Write() {
-	file, err := os.OpenFile("TestPack.pack2", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+// WritePack2 is quick and dirty
+func (p *Pack2) WritePack2(outDir, outName string) {
+
+	// Grab absolute path
+	outDir, err := filepath.Abs(outDir)
+	utils.Check(err)
+
+	// Create dir
+	err = os.MkdirAll(outDir, 0666)
+	utils.Check(err)
+
+	file, err := os.OpenFile(outDir+`\`+outName+".pack2", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	utils.Check(err)
 	defer file.Close()
 
