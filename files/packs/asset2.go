@@ -32,9 +32,9 @@ func (a *Asset2) LoadFromBinary(f *os.File) {
 
 	var isZip uint32
 	utils.ReadUInt32L(f, &isZip)
-	if isZip == 16 || isZip == 0 {
+	if isZip == 0x10 || isZip == 0x00 {
 		a.IsZip = false
-	} else {
+	} else if isZip == 0x01 || isZip == 0x11 {
 		a.IsZip = true
 	}
 	utils.ReadUInt32L(f, &a.Checksum)
