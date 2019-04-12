@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type TextMap struct {
+type FlatFile struct {
 	Name   string
 	Labels []string
 	Values [][]string
@@ -26,7 +26,7 @@ func packLine(l []string) (output string) {
 	return strings.Join(l, "^")
 }
 
-func (t *TextMap) LoadFromFile(path string) {
+func (t *FlatFile) LoadFromFile(path string) {
 
 	// Grab absolute path
 	path, err := filepath.Abs(path)
@@ -58,7 +58,7 @@ func (t *TextMap) LoadFromFile(path string) {
 	}
 }
 
-func (t *TextMap) DumpToFile(outdir string) {
+func (t *FlatFile) DumpToFile(outdir string) {
 
 	// Grab absolute path
 	outdir, err := filepath.Abs(outdir)
@@ -80,7 +80,7 @@ func (t *TextMap) DumpToFile(outdir string) {
 	}
 }
 
-func (t *TextMap) WriteToFile(outDir string) {
+func (t *FlatFile) WriteToFile(outDir string) {
 
 	// Grab absolute path
 	outDir, err := filepath.Abs(outDir)
@@ -107,7 +107,7 @@ func (t *TextMap) WriteToFile(outDir string) {
 	outFile.WriteString(strings.Join(objs, "\n::\n"))
 }
 
-func (t *TextMap) LoadFromCleanFile(path string) {
+func (t *FlatFile) LoadFromCleanFile(path string) {
 
 	// Grab absolute path
 	path, err := filepath.Abs(path)
