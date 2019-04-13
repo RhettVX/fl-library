@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"hash/crc32"
 	"log"
 	"os"
@@ -17,6 +18,10 @@ func Check(e error) {
 
 func CalcCrc32(data []byte) uint32 {
 	return crc32.ChecksumIEEE(data)
+}
+
+func Crc32Fmt(crc32 uint32) string {
+	return fmt.Sprintf("%08x", crc32)
 }
 
 func StringInSlice(a string, list []string) bool {
