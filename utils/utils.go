@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func Check(e error) {
@@ -34,4 +35,8 @@ func TakeInput() (output string) {
 
 	output = strings.Trim(output, "\n\r\"")
 	return output
+}
+
+func DateString() string {
+	return time.Now().Format("01-02-2006")
 }
