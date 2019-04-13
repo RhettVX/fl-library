@@ -81,7 +81,7 @@ func (p *Pack) LoadFromDir(path string) {
 
 	var a Asset
 	for _, f := range files {
-		a.Path = path + `\` + f.Name()
+		a.Path = filepath.Join(path, f.Name())
 		a.IsLoose = true
 		a.Name = []byte(f.Name())
 		a.Size = uint32(f.Size())
@@ -108,8 +108,8 @@ func (p *Pack) Unpack(outDir string) {
 	utils.Check(err)
 
 	// Create output directory
-	outDir += `\` + p.Name
-	err = os.MkdirAll(outDir, 0666)
+	outDir += string(filepath.Separator) + p.Name
+	err = os.MkdirAll(outDir, 0755)
 	utils.Check(err)
 
 	// Open pack file
@@ -134,11 +134,11 @@ func (p *Pack) WritePack(outDir, outName string) {
 	utils.Check(err)
 
 	// Create dir
-	err = os.MkdirAll(outDir, 0666)
+	err = os.MkdirAll(outDir, 0755)
 	utils.Check(err)
 
 	// Take this one chunk at a time
-	outFile, err := os.OpenFile(outDir+`\`+outName+".pack", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	outFile, err := os.OpenFile(filepath.Join(outDir, outName+p.getExt()), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	utils.Check(err)
 	defer outFile.Close()
 
@@ -193,7 +193,6 @@ func (p *Pack) WritePack(outDir, outName string) {
 		fileCount += chunkFileAmount
 
 		// Write next chunk offset
-		// TODO: Do that in a loop
 		outFile.Seek(chunkOffset, 0)
 		utils.WriteUInt32B(outFile, uint32(dataOffset))
 

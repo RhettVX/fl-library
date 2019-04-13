@@ -4,6 +4,7 @@ import (
 	"fl-library/utils"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -33,8 +34,8 @@ func (a *Asset) LoadFromBinary(f *os.File) {
 func (a *Asset) UnpackFromBinary(f *os.File, outDir string) {
 
 	// Open asset file
-	outDir += `\` + string(a.Name)
-	file, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	outDir += string(filepath.Separator) + string(a.Name)
+	file, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	utils.Check(err)
 	defer file.Close()
 

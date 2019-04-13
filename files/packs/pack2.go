@@ -79,7 +79,7 @@ func (p *Pack2) LoadFromDir(path string) {
 
 	var a Asset2
 	for _, f := range files {
-		a.Path = path + `\` + f.Name()
+		a.Path = path + string(filepath.Separator) + f.Name()
 		a.IsLoose = true
 		a.Name = f.Name()
 		a.NameHash = utils.Pack2Hash(bytes.ToUpper([]byte(a.Name)))
@@ -101,8 +101,8 @@ func (p *Pack2) LoadFromDir(path string) {
 func (p *Pack2) Unpack(outDir string) {
 
 	// Create output dir
-	outDir += `\` + p.Name
-	err := os.MkdirAll(outDir, 0666)
+	outDir += string(filepath.Separator) + p.Name
+	err := os.MkdirAll(outDir, 0755)
 	utils.Check(err)
 
 	// Open pack2 file
@@ -127,10 +127,10 @@ func (p *Pack2) WritePack2(outDir, outName string) {
 	utils.Check(err)
 
 	// Create dir
-	err = os.MkdirAll(outDir, 0666)
+	err = os.MkdirAll(outDir, 0755)
 	utils.Check(err)
 
-	file, err := os.OpenFile(outDir+`\`+outName+".pack2", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(filepath.Join(outDir, outName+p.getExt()), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	utils.Check(err)
 	defer file.Close()
 

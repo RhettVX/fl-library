@@ -36,7 +36,7 @@ func (t *FlatFile) LoadFromFile(path string) {
 	utils.Check(err)
 	defer inFile.Close()
 
-	t.Name = strings.TrimSuffix(filepath.Base(inFile.Name()), ".txt")
+	t.Name = strings.TrimSuffix(filepath.Base(inFile.Name()), t.getExt())
 
 	r := bufio.NewReader(inFile)
 	x, err := r.ReadByte()
@@ -65,12 +65,12 @@ func (t *FlatFile) DumpToFile(outdir string) {
 	utils.Check(err)
 
 	// Create directory
-	err = os.MkdirAll(outdir, 0666)
+	err = os.MkdirAll(outdir, 0755)
 	utils.Check(err)
-	outdir += `\` + t.Name + ".txt"
+	outdir += string(filepath.Separator) + t.Name + t.getExt()
 
 	// Open out file
-	outFile, err := os.OpenFile(outdir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	outFile, err := os.OpenFile(outdir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	utils.Check(err)
 	defer outFile.Close()
 
@@ -87,12 +87,12 @@ func (t *FlatFile) WriteToFile(outDir string) {
 	utils.Check(err)
 
 	// Create directory
-	err = os.MkdirAll(outDir, 0666)
+	err = os.MkdirAll(outDir, 0755)
 	utils.Check(err)
-	outDir += `\` + t.Name + "_clean.txt"
+	outDir += string(filepath.Separator) + t.Name + "_clean" + t.getExt()
 
 	// Open outfile
-	outFile, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	outFile, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	utils.Check(err)
 	defer outFile.Close()
 
@@ -117,7 +117,7 @@ func (t *FlatFile) LoadFromCleanFile(path string) {
 	utils.Check(err)
 	defer inFile.Close()
 
-	t.Name = strings.TrimSuffix(filepath.Base(inFile.Name()), "_clean.txt")
+	t.Name = strings.TrimSuffix(filepath.Base(inFile.Name()), "_clean"+t.getExt())
 	t.Name += "_MOD"
 
 	fs, err := inFile.Stat()
@@ -140,4 +140,8 @@ func (t *FlatFile) LoadFromCleanFile(path string) {
 		}
 		t.Values = append(t.Values, obj)
 	}
+}
+
+func (f *FlatFile) getExt() string {
+	return ".txt"
 }

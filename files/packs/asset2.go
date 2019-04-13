@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -44,12 +45,12 @@ func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {
 
 	// Open asset file
 	if a.Name == "" {
-		outDir += fmt.Sprintf("\\%x.bin", a.NameHash)
+		outDir += fmt.Sprintf(string(filepath.Separator)+"%x.bin", a.NameHash)
 	} else {
-		outDir += fmt.Sprintf("\\%s", a.Name)
+		outDir += fmt.Sprintf(string(filepath.Separator)+"%s", a.Name)
 	}
 
-	file, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	utils.Check(err)
 	defer file.Close()
 
@@ -94,7 +95,7 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
 
 			upperString := bytes.ToUpper([]byte(n))
 			hashCaps := utils.Pack2Hash(upperString)
-			nameList = append(nameList, utils.HashName{hashCaps, n})
+			nameList = append(nameList, utils.HashName{Hash: hashCaps, Name: n})
 		}
 	} else { // TODO: I am too tired to remember what should go here
 		buffer := make([]byte, a.PackedSize)
@@ -108,7 +109,7 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
 
 			upperString := bytes.ToUpper([]byte(n))
 			hashCaps := utils.Pack2Hash(upperString)
-			nameList = append(nameList, utils.HashName{hashCaps, n})
+			nameList = append(nameList, utils.HashName{Hash: hashCaps, Name: n})
 		}
 	}
 
