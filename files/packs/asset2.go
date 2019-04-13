@@ -20,7 +20,7 @@ type Asset2 struct {
 	RealSize   uint64
 	PackedSize uint64
 	IsZip      bool
-	Checksum   uint32
+	Crc32      uint32
 }
 
 func (a *Asset2) LoadFromBinary(f *os.File) {
@@ -37,7 +37,7 @@ func (a *Asset2) LoadFromBinary(f *os.File) {
 	} else if isZip == 0x01 || isZip == 0x11 {
 		a.IsZip = true
 	}
-	utils.ReadUInt32L(f, &a.Checksum)
+	utils.ReadUInt32L(f, &a.Crc32)
 }
 
 func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {

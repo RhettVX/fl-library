@@ -92,7 +92,7 @@ func (p *Pack2) LoadFromDir(path string) {
 
 		buffer := make([]byte, a.RealSize)
 		file.Read(buffer)
-		a.Checksum = utils.CalcCrc32(buffer)
+		a.Crc32 = utils.CalcCrc32(buffer)
 
 		p.Assets = append(p.Assets, a)
 	}
@@ -149,7 +149,7 @@ func (p *Pack2) WritePack2(outDir, outName string) {
 		utils.WriteUInt64L(file, dataOffset)
 		utils.WriteUInt64L(file, a.RealSize)
 		utils.WriteUInt32L(file, 0x10)
-		utils.WriteUInt32L(file, a.Checksum)
+		utils.WriteUInt32L(file, a.Crc32)
 
 		// Write data
 		inFile, err := os.Open(a.Path)
