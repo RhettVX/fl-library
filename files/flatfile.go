@@ -74,9 +74,9 @@ func (t *FlatFile) DumpToFile(outdir string) {
 	utils.Check(err)
 	defer outFile.Close()
 
-	outFile.Write([]byte(fmt.Sprintf("#%s", strings.ToUpper(packLine(t.Labels)))))
+	utils.FileWrite(outFile, []byte(fmt.Sprintf("#%s", strings.ToUpper(packLine(t.Labels)))))
 	for _, line := range t.Values {
-		outFile.Write([]byte(packLine(line)))
+		utils.FileWrite(outFile, []byte(packLine(line)))
 	}
 }
 
@@ -104,7 +104,7 @@ func (t *FlatFile) WriteToFile(outDir string) {
 		}
 		objs = append(objs, strings.Join(obj, ",\n"))
 	}
-	outFile.WriteString(strings.Join(objs, "\n::\n"))
+	utils.FileWriteString(outFile, strings.Join(objs, "\n::\n"))
 }
 
 func (t *FlatFile) LoadFromCleanFile(path string) {
@@ -123,9 +123,8 @@ func (t *FlatFile) LoadFromCleanFile(path string) {
 	fs, err := inFile.Stat()
 	utils.Check(err)
 	data := make([]byte, int64(fs.Size()))
-	inFile.Read(data)
+	utils.FileRead(inFile, data)
 
-	utils.Check(err)
 	lines := strings.Split(string(data), "\n::\n")
 
 	for _, o := range lines {

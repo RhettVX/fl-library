@@ -58,7 +58,8 @@ func (p *Pack) LoadFromFile(path string) {
 		}
 
 		chunkCount++
-		file.Seek(int64(nextChunk), 0)
+		_, err = file.Seek(int64(nextChunk), 0)
+		utils.Check(err)
 
 		if nextChunk == 0 {
 			println("Finished!\n")
@@ -92,7 +93,7 @@ func (p *Pack) LoadFromDir(path string) {
 		defer file.Close()
 
 		buffer := make([]byte, a.Size)
-		file.Read(buffer)
+		utils.FileRead(file, buffer)
 		a.Crc32 = utils.CalcCrc32(buffer)
 
 		p.Assets = append(p.Assets, a)
@@ -150,8 +151,8 @@ func (p *Pack) WritePack(outDir, outName string) {
 		dataOffset := chunkOffset + p.getPadding()
 
 		// Write chunk padding
-		outFile.Write(make([]byte, p.getPadding()))
-		outFile.Seek(chunkOffset, 0)
+		utils.FileWrite(outFile, make([]byte, p.getPadding()))
+		utils.FileSeek(outFile, chunkOffset, 0)
 
 		// Write chunk info
 		utils.WriteUInt32B(outFile, 0) // NextChunk dummy
@@ -167,7 +168,7 @@ func (p *Pack) WritePack(outDir, outName string) {
 			}
 
 			utils.WriteUInt32B(outFile, uint32(len(a.Name)))
-			outFile.Write([]byte(a.Name))
+			utils.FileWrite(outFile, []byte(a.Name))
 			utils.WriteUInt32B(outFile, uint32(dataOffset))
 			utils.WriteUInt32B(outFile, a.Size)
 			utils.WriteUInt32B(outFile, a.Crc32)
@@ -179,8 +180,9 @@ func (p *Pack) WritePack(outDir, outName string) {
 
 			// Write asset data to pack
 			buffer := make([]byte, a.Size)
-			inFile.Read(buffer)
-			outFile.WriteAt(buffer, dataOffset)
+			utils.FileRead(inFile, buffer)
+			utils.FileWriteAt(outFile, buffer, dataOffset)
+
 			dataOffset += int64(a.Size)
 			chunkFileAmount++
 
@@ -193,12 +195,12 @@ func (p *Pack) WritePack(outDir, outName string) {
 		fileCount += chunkFileAmount
 
 		// Write next chunk offset
-		outFile.Seek(chunkOffset, 0)
+		utils.FileSeek(outFile, chunkOffset, 0)
 		utils.WriteUInt32B(outFile, uint32(dataOffset))
 
 		// Write chunk file amount
 		utils.WriteUInt32B(outFile, uint32(chunkFileAmount))
-		outFile.Seek(dataOffset, 0)
+		utils.FileSeek(outFile, dataOffset, 0)
 
 		// Check for remaining files
 		chunkCount++

@@ -57,10 +57,12 @@ func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {
 	// Write asset data
 	if !a.IsZip {
 		buffer := make([]byte, int64(a.PackedSize))
-		f.ReadAt(buffer, int64(a.Offset))
-		file.Write(buffer)
+		utils.FileReadAt(file, buffer, int64(a.Offset))
+
+		utils.FileWrite(file, buffer)
 	} else {
-		f.Seek(int64(a.Offset+4), 0) // Skip to zlib data
+		_, err = f.Seek(int64(a.Offset+4), 0) // Skip to zlib data
+		utils.Check(err)
 
 		var realSize uint32
 		utils.ReadUInt32B(f, &realSize)
@@ -70,8 +72,10 @@ func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {
 		utils.Check(err)
 		defer r.Close()
 
-		io.Copy(&b, r)
-		file.Write(b.Bytes())
+		_, err = io.Copy(&b, r)
+		utils.Check(err)
+
+		utils.FileWrite(file, b.Bytes())
 	}
 }
 
@@ -79,13 +83,14 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
 	pos, _ := f.Seek(0, 1)
 
 	if a.IsZip {
-		f.Seek(int64(a.Offset+8), 0)
+		utils.FileSeek(f, int64(a.Offset+8), 0)
 		var b bytes.Buffer
 		r, err := zlib.NewReader(f)
 		utils.Check(err)
 		defer r.Close()
 
-		io.Copy(&b, r)
+		_, err = io.Copy(&b, r)
+		utils.Check(err)
 
 		names := strings.Split(string(b.Bytes()), "\x0a")
 		for _, n := range names {
@@ -97,9 +102,9 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
 			hashCaps := utils.Pack2Hash(upperString)
 			nameList = append(nameList, utils.HashName{Hash: hashCaps, Name: n})
 		}
-	} else { // TODO: I am too tired to remember what should go here
+	} else {
 		buffer := make([]byte, a.PackedSize)
-		f.ReadAt(buffer, int64(a.Offset))
+		utils.FileReadAt(f, buffer, int64(a.Offset))
 
 		names := strings.Split(string(buffer), "\x0a")
 		for _, n := range names {
@@ -113,7 +118,7 @@ func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
 		}
 	}
 
-	f.Seek(pos, 0)
+	utils.FileSeek(f, pos, 0)
 	return nameList
 }
 

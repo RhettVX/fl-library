@@ -13,6 +13,38 @@ func Tell(f *os.File) int64 {
 	return pos
 }
 
+func FileSeek(f *os.File, offset int64, whence int) {
+	_, err := f.Seek(offset, whence)
+	Check(err)
+}
+
+// Read
+func FileRead(f *os.File, b []byte) {
+	_, err := f.Read(b)
+	Check(err)
+}
+
+func FileReadAt(f *os.File, b []byte, off int64) {
+	_, err := f.ReadAt(b, off)
+	Check(err)
+}
+
+// Write
+func FileWrite(f *os.File, b []byte) {
+	_, err := f.Write(b)
+	Check(err)
+}
+
+func FileWriteAt(f *os.File, b []byte, off int64) {
+	_, err := f.WriteAt(b, off)
+	Check(err)
+}
+
+func FileWriteString(f *os.File, s string) {
+	_, err := f.WriteString(s)
+	Check(err)
+}
+
 // 32 Big
 func ReadUInt32B(r io.Reader, i *uint32) {
 	err := binary.Read(r, binary.BigEndian, i)

@@ -24,7 +24,7 @@ func (a *Asset) LoadFromBinary(f *os.File) {
 	a.IsLoose = false
 	utils.ReadUInt32B(f, &nameLength)
 	a.Name = make([]byte, int(nameLength))
-	f.Read(a.Name)
+	utils.FileRead(f, a.Name)
 
 	utils.ReadUInt32B(f, &a.Offset)
 	utils.ReadUInt32B(f, &a.Size)
@@ -41,8 +41,8 @@ func (a *Asset) UnpackFromBinary(f *os.File, outDir string) {
 
 	// Write data to file
 	buffer := make([]byte, int64(a.Size))
-	f.ReadAt(buffer, int64(a.Offset))
-	file.Write(buffer)
+	utils.FileReadAt(file, buffer, int64(a.Offset))
+	utils.FileWrite(file, buffer)
 }
 
 // GetSize returns size off asset header

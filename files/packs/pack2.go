@@ -37,7 +37,7 @@ func (p *Pack2) LoadFromFile(path string) {
 
 	// Load pack2
 	id := make([]byte, 4)
-	inFile.Read(id)
+	utils.FileRead(inFile, id)
 	if !reflect.DeepEqual(id, p.getID()) {
 		log.Println("Wrong file magic")
 		return
@@ -51,7 +51,7 @@ func (p *Pack2) LoadFromFile(path string) {
 	utils.ReadUInt64L(inFile, &mapOffset)
 
 	// Load map
-	inFile.Seek(int64(mapOffset), 0)
+	utils.FileSeek(inFile, int64(mapOffset), 0)
 	for i := 0; i < int(assetAmount); i++ {
 		var a Asset2
 		a.Path = p.Path
@@ -91,7 +91,7 @@ func (p *Pack2) LoadFromDir(path string) {
 		defer file.Close()
 
 		buffer := make([]byte, a.RealSize)
-		file.Read(buffer)
+		utils.FileRead(file, buffer)
 		a.Crc32 = utils.CalcCrc32(buffer)
 
 		p.Assets = append(p.Assets, a)
@@ -134,14 +134,14 @@ func (p *Pack2) WritePack2(outDir, outName string) {
 	utils.Check(err)
 	defer file.Close()
 
-	file.Write(p.getID())
+	utils.FileWrite(file, p.getID())
 	utils.WriteUInt32L(file, uint32(len(p.Assets)))
 	utils.WriteUInt64L(file, 0)                     // This gets replaced later
 	utils.WriteUInt64L(file, p.getTotalSize()+0x20) // TODO: Just go unzipped for now
 	utils.WriteUInt64L(file, 256)
 
 	pad := make([]byte, p.getTotalSize())
-	file.Write(pad)
+	utils.FileWrite(file, pad)
 
 	var dataOffset uint64 = 0x20
 	for _, a := range p.Assets {
@@ -158,13 +158,13 @@ func (p *Pack2) WritePack2(outDir, outName string) {
 
 		buffer := make([]byte, a.RealSize)
 
-		inFile.Read(buffer)
-		file.WriteAt(buffer, int64(dataOffset))
+		utils.FileRead(inFile, buffer)
+		utils.FileWriteAt(file, buffer, int64(dataOffset))
 
 		dataOffset += a.RealSize
 	}
 	packSize := utils.Tell(file)
-	file.Seek(0x8, 0)
+	utils.FileSeek(file, 0x8, 0)
 	utils.WriteUInt64L(file, uint64(packSize))
 }
 
