@@ -58,8 +58,7 @@ func (p *Pack) LoadFromFile(path string) {
 		}
 
 		chunkCount++
-		_, err = file.Seek(int64(nextChunk), 0)
-		utils.Check(err)
+		utils.FileSeek(file, int64(nextChunk), 0)
 
 		if nextChunk == 0 {
 			println("Finished!\n")

@@ -41,7 +41,7 @@ func (a *Asset) UnpackFromBinary(f *os.File, outDir string) {
 
 	// Write data to file
 	buffer := make([]byte, int64(a.Size))
-	utils.FileReadAt(file, buffer, int64(a.Offset))
+	utils.FileReadAt(f, buffer, int64(a.Offset))
 	utils.FileWrite(file, buffer)
 }
 

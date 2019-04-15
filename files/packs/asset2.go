@@ -57,12 +57,11 @@ func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {
 	// Write asset data
 	if !a.IsZip {
 		buffer := make([]byte, int64(a.PackedSize))
-		utils.FileReadAt(file, buffer, int64(a.Offset))
+		utils.FileReadAt(f, buffer, int64(a.Offset))
 
 		utils.FileWrite(file, buffer)
 	} else {
-		_, err = f.Seek(int64(a.Offset+4), 0) // Skip to zlib data
-		utils.Check(err)
+		utils.FileSeek(f, int64(a.Offset+4), 0) // Skip to zlib data
 
 		var realSize uint32
 		utils.ReadUInt32B(f, &realSize)
