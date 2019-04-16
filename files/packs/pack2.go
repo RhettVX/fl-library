@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -136,14 +137,14 @@ func (p *Pack2) WritePack2(outDir, outName string) {
 
 	utils.FileWrite(file, p.getID())
 	utils.WriteUInt32L(file, uint32(len(p.Assets)))
-	utils.WriteUInt64L(file, 0)                     // This gets replaced later
-	utils.WriteUInt64L(file, p.getTotalSize()+0x20) // TODO: Just go unzipped for now
+	utils.WriteUInt64L(file, 0)                      // This gets replaced later
+	utils.WriteUInt64L(file, p.getTotalSize()+0x200) // TODO: Just go unzipped for now
 	utils.WriteUInt64L(file, 256)
 
-	pad := make([]byte, p.getTotalSize())
+	pad := make([]byte, p.getTotalSize()+0x200-0x20)
 	utils.FileWrite(file, pad)
 
-	var dataOffset uint64 = 0x20
+	var dataOffset uint64 = 0x200
 	for _, a := range p.Assets {
 		utils.WriteUInt64L(file, a.NameHash)
 		utils.WriteUInt64L(file, dataOffset)
@@ -179,6 +180,12 @@ func (p *Pack2) getTotalSize() (output uint64) {
 		output += a.RealSize
 	}
 	return output
+}
+
+func (p *Pack2) SortAssets() {
+	sort.Slice(p.Assets[:], func(i, j int) bool {
+		return p.Assets[i].NameHash < p.Assets[j].NameHash
+	})
 }
 
 func (p *Pack2) getNameHash() uint64 {
