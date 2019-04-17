@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+/*
+TODO: This file needs cleaned up a bit
+*/
+
 type FlatFile struct {
 	Name   string
 	Labels []string
@@ -89,7 +93,7 @@ func (t *FlatFile) WriteToFile(outDir string) {
 	// Create directory
 	err = os.MkdirAll(outDir, 0755)
 	utils.Check(err)
-	outDir += string(filepath.Separator) + t.Name + "_clean" + t.getExt()
+	outDir += string(filepath.Separator) + t.Name + "_CLEAN" + t.getExt()
 
 	// Open outfile
 	outFile, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
@@ -117,7 +121,7 @@ func (t *FlatFile) LoadFromCleanFile(path string) {
 	utils.Check(err)
 	defer inFile.Close()
 
-	t.Name = strings.TrimSuffix(filepath.Base(inFile.Name()), "_clean"+t.getExt())
+	t.Name = strings.TrimSuffix(filepath.Base(inFile.Name()), "_CLEAN"+t.getExt())
 	t.Name += "_MOD"
 
 	fs, err := inFile.Stat()
