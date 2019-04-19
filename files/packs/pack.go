@@ -48,7 +48,7 @@ func (p *Pack) LoadFromFile(path string) {
 		utils.ReadUInt32B(file, &assetAmount)
 
 		// Load assets
-		fmt.Printf("Loading %d assets from chunk %d..\n", assetAmount, chunkCount)
+		// fmt.Printf("Loading %d assets from chunk %d..\n", assetAmount, chunkCount)
 		var a Asset
 		for i := 0; i < int(assetAmount); i++ {
 			a.Path = p.Path
