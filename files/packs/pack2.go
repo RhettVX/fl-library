@@ -75,12 +75,32 @@ func (p *Pack2) LoadFromDir(path string) {
 	// Load files
 	fmt.Printf("Loading '%s' as pack2...\n", path)
 
+	namePath := filepath.Join(path, "{NAMELIST}")
+	if _, err := os.Stat(namePath); err == nil {
+		err = os.Remove(namePath)
+		utils.Check(err)
+	} else if os.IsNotExist(err) {
+
+	} else {
+		utils.Check(err)
+	}
+
 	files, err := ioutil.ReadDir(path)
 	utils.Check(err)
 
+	// Generate NameList
+	nameFile, err := os.OpenFile(namePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	utils.Check(err)
+	defer nameFile.Close()
+
+	utils.FileWrite(nameFile, []byte("{NAMELIST}\x0a"))
+	for _, f := range files {
+		utils.FileWrite(nameFile, []byte(f.Name()+"\x0a"))
+	}
+
 	var a Asset2
 	for _, f := range files {
-		a.Path = path + string(filepath.Separator) + f.Name()
+		a.Path = filepath.Join(path, f.Name())
 		a.IsLoose = true
 		a.Name = f.Name()
 		a.NameHash = utils.Pack2Hash(bytes.ToUpper([]byte(a.Name)))
@@ -115,7 +135,9 @@ func (p *Pack2) Unpack(outDir string) {
 	fmt.Printf("Unpacking %s..\n", p.Path)
 
 	for _, a := range p.Assets {
-		a.UnpackFromBinary(inFile, outDir)
+		if a.Name != "{NAMELIST}" {
+			a.UnpackFromBinary(inFile, outDir)
+		}
 	}
 	println("Finished!\n")
 }
