@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type Asset2 struct {
@@ -45,7 +44,7 @@ func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {
 
 	// Open asset file
 	if a.Name == "" {
-		outDir += fmt.Sprintf(string(filepath.Separator)+"%x.bin", a.NameHash)
+		outDir += fmt.Sprintf(string(filepath.Separator)+"%016x.bin", a.NameHash)
 	} else {
 		outDir += fmt.Sprintf(string(filepath.Separator)+"%s", a.Name)
 	}
@@ -75,58 +74,5 @@ func (a *Asset2) UnpackFromBinary(f *os.File, outDir string) {
 		utils.Check(err)
 
 		utils.FileWrite(file, b.Bytes())
-	}
-}
-
-func (a *Asset2) ReadNameList(f *os.File) (nameList []utils.HashName) {
-	pos, _ := f.Seek(0, 1)
-
-	if a.IsZip {
-		utils.FileSeek(f, int64(a.Offset+8), 0)
-		var b bytes.Buffer
-		r, err := zlib.NewReader(f)
-		utils.Check(err)
-		defer r.Close()
-
-		_, err = io.Copy(&b, r)
-		utils.Check(err)
-
-		names := strings.Split(string(b.Bytes()), "\x0a")
-		for _, n := range names {
-			if n == "" {
-				continue
-			}
-
-			upperString := bytes.ToUpper([]byte(n))
-			hashCaps := utils.Pack2Hash(upperString)
-			nameList = append(nameList, utils.HashName{Hash: hashCaps, Name: n})
-		}
-	} else {
-		buffer := make([]byte, a.PackedSize)
-		utils.FileReadAt(f, buffer, int64(a.Offset))
-
-		names := strings.Split(string(buffer), "\x0a")
-		for _, n := range names {
-			if n == "" {
-				continue
-			}
-
-			upperString := bytes.ToUpper([]byte(n))
-			hashCaps := utils.Pack2Hash(upperString)
-			nameList = append(nameList, utils.HashName{Hash: hashCaps, Name: n})
-		}
-	}
-
-	utils.FileSeek(f, pos, 0)
-	return nameList
-}
-
-func (a *Asset2) ApplyName(nameList []utils.HashName) {
-	for _, x := range nameList {
-
-		if a.NameHash == x.Hash {
-			a.Name = x.Name
-			return
-		}
 	}
 }

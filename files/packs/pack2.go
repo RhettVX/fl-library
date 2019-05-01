@@ -2,6 +2,8 @@ package packs
 
 import (
 	"bytes"
+	"encoding/binary"
+	"encoding/hex"
 	"fl-library/utils"
 	"fmt"
 	"io/ioutil"
@@ -59,10 +61,6 @@ func (p *Pack2) LoadFromFile(path string) {
 		a.LoadFromBinary(inFile)
 
 		p.Assets = append(p.Assets, a)
-
-		if a.NameHash == p.getNameHash() {
-			p.NameList = a.ReadNameList(inFile)
-		}
 		// fmt.Printf("%x : %x : %d : %t\n", a.NameHash, a.Offset, a.PackedSize, a.IsZip)
 	}
 }
@@ -75,35 +73,27 @@ func (p *Pack2) LoadFromDir(path string) {
 	// Load files
 	fmt.Printf("Loading '%s' as pack2...\n", path)
 
-	namePath := filepath.Join(path, "{NAMELIST}")
-	if _, err := os.Stat(namePath); err == nil {
-		err = os.Remove(namePath)
-		utils.Check(err)
-	} else if os.IsNotExist(err) {
-
-	} else {
-		utils.Check(err)
-	}
-
 	files, err := ioutil.ReadDir(path)
 	utils.Check(err)
-
-	// Generate NameList
-	nameFile, err := os.OpenFile(namePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	utils.Check(err)
-	defer nameFile.Close()
-
-	utils.FileWrite(nameFile, []byte("{NAMELIST}\x0a"))
-	for _, f := range files {
-		utils.FileWrite(nameFile, []byte(f.Name()+"\x0a"))
-	}
 
 	var a Asset2
 	for _, f := range files {
 		a.Path = filepath.Join(path, f.Name())
 		a.IsLoose = true
-		a.Name = f.Name()
-		a.NameHash = utils.Pack2Hash(bytes.ToUpper([]byte(a.Name)))
+
+		// Check if name is hash
+		if filepath.Ext(f.Name()) == ".bin" {
+			println("Not a named")
+			a.Name = ""
+			nameHex, err := hex.DecodeString(strings.TrimSuffix(f.Name(), filepath.Ext(f.Name())))
+			utils.Check(err)
+			a.NameHash = binary.BigEndian.Uint64(nameHex)
+			println(f.Name())
+			fmt.Printf("%016x\n", a.NameHash)
+		} else {
+			a.Name = f.Name()
+			a.NameHash = utils.Pack2Hash(bytes.ToUpper([]byte(a.Name)))
+		}
 		a.RealSize = uint64(f.Size())
 
 		// Generate checksum
@@ -135,9 +125,7 @@ func (p *Pack2) Unpack(outDir string) {
 	fmt.Printf("Unpacking %s..\n", p.Path)
 
 	for _, a := range p.Assets {
-		if a.Name != "{NAMELIST}" {
-			a.UnpackFromBinary(inFile, outDir)
-		}
+		a.UnpackFromBinary(inFile, outDir)
 	}
 	println("Finished!\n")
 }
@@ -191,12 +179,6 @@ func (p *Pack2) WritePack2(outDir, outName string) {
 	utils.WriteUInt64L(file, uint64(packSize))
 }
 
-func (p *Pack2) ApplyHash() {
-	for i := range p.Assets {
-		p.Assets[i].ApplyName(p.NameList)
-	}
-}
-
 func (p *Pack2) getTotalSize() (output uint64) {
 	for _, a := range p.Assets {
 		output += a.RealSize
@@ -208,10 +190,6 @@ func (p *Pack2) SortAssets() {
 	sort.Slice(p.Assets[:], func(i, j int) bool {
 		return p.Assets[i].NameHash < p.Assets[j].NameHash
 	})
-}
-
-func (p *Pack2) getNameHash() uint64 {
-	return 0x4137cc65bd97fd30
 }
 
 func (p *Pack2) getExt() string {

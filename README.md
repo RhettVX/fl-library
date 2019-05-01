@@ -8,6 +8,8 @@ Rough library for playing with various Forgelight engine files.
 - **flat files:** Unpacking and packing.
 
 #### TODO:
+- [ ] Add custom namelist support
+- [ ] Generate updated namelist with each patch
 - [ ] Index the locale
 - [ ] Finish map-stitcher
 - [ ] Handle nonames in index
