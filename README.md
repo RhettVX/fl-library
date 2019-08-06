@@ -1,6 +1,6 @@
 # fl-library :x:DEPRECATED:x:
 
-## This project is discontinued. Refer to https://github.com/RhettVX/forgelight-toolbox and my other repos
+## This project is discontinued. Refer to https://github.com/RhettVX/dbg-pack and my other repos
 
 Rough library for playing with various Forgelight engine files.
 
